@@ -30,12 +30,21 @@ export function ItemCatalog() {
   const [rate, setRate] = useState('850')
   const [sizes, setSizes] = useState(PITAMARI_SIZES.join(', '))
   const [styles, setStyles] = useState(PITAMARI_STYLES.join(', '))
+  const [selectedSize, setSelectedSize] = useState('')
+  const [selectedStyle, setSelectedStyle] = useState('')
+  const [newSize, setNewSize] = useState('')
+  const [newStyle, setNewStyle] = useState('')
+  const [addingSize, setAddingSize] = useState(false)
+  const [addingStyle, setAddingStyle] = useState(false)
 
   function start(item?: CatalogItem) {
     setEditing(item ?? null)
     const value = item ? { ...item } : defaults(name)
     setName(value.name); setUnit(value.defaultUnit); setRate(String(value.defaultRate ?? 0))
     setSizes(value.sizes.join(', ')); setStyles(value.styles?.join(', ') ?? '')
+    setSelectedSize(value.sizes[0] ?? '')
+    setSelectedStyle(value.styles?.[0] ?? '')
+    setNewSize(''); setNewStyle(''); setAddingSize(false); setAddingStyle(false)
     setOpen(true)
   }
 
@@ -44,11 +53,14 @@ export function ItemCatalog() {
     if (!editing) {
       const next = defaults(value)
       setUnit(next.defaultUnit); setRate(String(next.defaultRate)); setSizes(next.sizes.join(', ')); setStyles(next.styles?.join(', ') ?? '')
+      setSelectedSize(next.sizes[0] ?? ''); setSelectedStyle(next.styles?.[0] ?? '')
     }
   }
 
   function save() {
-    const payload = { name, defaultUnit: unit.trim(), defaultRate: Number(rate) || 0, sizes: sizes.split(',').map((x) => x.trim()).filter(Boolean), styles: styles.split(',').map((x) => x.trim()).filter(Boolean) }
+    const sizeValues = sizes.split(',').map((x) => x.trim()).filter(Boolean)
+    const styleValues = styles.split(',').map((x) => x.trim()).filter(Boolean)
+    const payload = { name, defaultUnit: unit.trim(), defaultRate: Number(rate) || 0, sizes: sizeValues, styles: styleValues }
     if (!payload.defaultUnit || !payload.sizes.length) return toast.error('यूनिट और साइज़ भरें')
     if (editing) update(editing.id, payload); else add(payload)
     setOpen(false); toast.success(editing ? 'आइटम अपडेट हो गया' : 'आइटम जोड़ दिया गया')
@@ -72,8 +84,28 @@ export function ItemCatalog() {
               </div><p className="text-xs text-muted-foreground">हिंदी नाम चुनें; बिल में यही नाम अपने-आप आएगा।</p></div>
               <div className="grid gap-2"><Label>यूनिट (Unit)</Label><Select items={UNIT_OPTIONS.map((item) => ({ label: item, value: item }))} value={unit} onValueChange={(value) => value && setUnit(value)}><SelectTrigger className="w-full cursor-pointer"><SelectValue placeholder="यूनिट चुनें" /></SelectTrigger><SelectContent><SelectGroup>{UNIT_OPTIONS.map((item) => <SelectItem className="cursor-pointer" key={item} value={item}>{item}</SelectItem>)}</SelectGroup></SelectContent></Select></div>
               <div className="grid gap-2"><Label>रेट / कीमत (₹)</Label><Input type="number" min="0" value={rate} onChange={(e) => setRate(e.target.value)} placeholder="जैसे 850" /></div>
-              <div className="grid gap-2"><Label>साइज़ विकल्प (comma separated)</Label><Input value={sizes} onChange={(e) => setSizes(e.target.value)} placeholder="A, AA, AAA" /></div>
-              <div className="grid gap-2"><Label>स्टाइल विकल्प (comma separated)</Label><Input value={styles} onChange={(e) => setStyles(e.target.value)} placeholder="बंगला, हिंदी" /></div>
+              <div className="grid gap-2">
+                <Label>साइज़ विकल्प (Size)</Label>
+                <div className="flex gap-2">
+                  <Select items={sizes.split(',').map((item) => item.trim()).filter(Boolean).map((item) => ({ label: item, value: item }))} value={selectedSize || null} onValueChange={(value) => value && setSelectedSize(value)}>
+                    <SelectTrigger className="w-full cursor-pointer"><SelectValue placeholder="साइज़ चुनें" /></SelectTrigger>
+                    <SelectContent><SelectGroup>{sizes.split(',').map((item) => item.trim()).filter(Boolean).map((item) => <SelectItem className="cursor-pointer" key={item} value={item}>{item}</SelectItem>)}</SelectGroup></SelectContent>
+                  </Select>
+                  <Button type="button" variant="outline" size="icon" className="shrink-0 cursor-pointer" aria-label="साइज़ जोड़ें" onClick={() => setAddingSize((value) => !value)}><PlusIcon /></Button>
+                </div>
+                {addingSize && <div className="flex gap-2"><Input autoFocus value={newSize} onChange={(event) => setNewSize(event.target.value)} placeholder="नया साइज़" /><Button type="button" className="cursor-pointer" onClick={() => { const value = newSize.trim(); if (!value) return; setSizes((current) => [...new Set([...current.split(',').map((item) => item.trim()).filter(Boolean), value])].join(', ')); setSelectedSize(value); setNewSize(''); setAddingSize(false) }}>जोड़ें</Button></div>}
+              </div>
+              <div className="grid gap-2">
+                <Label>स्टाइल विकल्प (Style)</Label>
+                <div className="flex gap-2">
+                  <Select items={styles.split(',').map((item) => item.trim()).filter(Boolean).map((item) => ({ label: item, value: item }))} value={selectedStyle || null} onValueChange={(value) => value && setSelectedStyle(value)}>
+                    <SelectTrigger className="w-full cursor-pointer"><SelectValue placeholder="स्टाइल चुनें" /></SelectTrigger>
+                    <SelectContent><SelectGroup>{styles.split(',').map((item) => item.trim()).filter(Boolean).map((item) => <SelectItem className="cursor-pointer" key={item} value={item}>{item}</SelectItem>)}</SelectGroup></SelectContent>
+                  </Select>
+                  <Button type="button" variant="outline" size="icon" className="shrink-0 cursor-pointer" aria-label="स्टाइल जोड़ें" onClick={() => setAddingStyle((value) => !value)}><PlusIcon /></Button>
+                </div>
+                {addingStyle && <div className="flex gap-2"><Input autoFocus value={newStyle} onChange={(event) => setNewStyle(event.target.value)} placeholder="नई स्टाइल" /><Button type="button" className="cursor-pointer" onClick={() => { const value = newStyle.trim(); if (!value) return; setStyles((current) => [...new Set([...current.split(',').map((item) => item.trim()).filter(Boolean), value])].join(', ')); setSelectedStyle(value); setNewStyle(''); setAddingStyle(false) }}>जोड़ें</Button></div>}
+              </div>
             </div>
             <DialogFooter><Button className="cursor-pointer" onClick={save}>सेव करें</Button></DialogFooter>
           </DialogContent>
