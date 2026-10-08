@@ -172,6 +172,9 @@
 }
 
 @layer base {
+  button, [role='button'], a, select, summary { cursor: pointer; }
+  button:disabled, [aria-disabled='true'] { cursor: not-allowed; }
+
   * {
     @apply border-border outline-ring/50;
   }

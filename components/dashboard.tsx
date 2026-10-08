@@ -1,7 +1,8 @@
 'use client'
 
+import { usePathname, useRouter } from 'next/navigation'
 import { motion } from 'motion/react'
-import { ShirtIcon, LogOutIcon, FileTextIcon, BookOpenIcon } from 'lucide-react'
+import { ShirtIcon, LogOutIcon, FileTextIcon, BookOpenIcon, PackageIcon } from 'lucide-react'
 
 import { useAuthStore } from '@/lib/store'
 import { Button } from '@/components/ui/button'
@@ -9,10 +10,14 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { MetricCards } from '@/components/metric-cards'
 import { NewBillForm } from '@/components/new-bill/new-bill-form'
 import { LedgerTab } from '@/components/ledger/ledger-tab'
+import { ItemCatalog } from '@/components/items/item-catalog'
 
 export function Dashboard() {
   const user = useAuthStore((s) => s.user)
   const logout = useAuthStore((s) => s.logout)
+  const pathname = usePathname()
+  const router = useRouter()
+  const section = pathname.endsWith('/items') ? 'items' : pathname.endsWith('/ledger') ? 'ledger' : 'new-bill'
 
   return (
     <div className="min-h-dvh bg-background">
@@ -62,25 +67,21 @@ export function Dashboard() {
           <MetricCards />
         </div>
 
-        <Tabs defaultValue="new-bill" className="gap-4">
-          <TabsList className="h-9 w-full max-w-md">
-            <TabsTrigger value="new-bill">
-              <FileTextIcon data-icon="inline-start" />
-              नया बिल (New Bill)
+        <Tabs defaultValue={section} className="gap-4">
+          <TabsList className="h-9 w-full max-w-lg">
+            <TabsTrigger value="new-bill" onClick={() => router.push('/dashboard') }>
+              <FileTextIcon data-icon="inline-start" />नया बिल
             </TabsTrigger>
-            <TabsTrigger value="ledger">
-              <BookOpenIcon data-icon="inline-start" />
-              खाता बही (Ledger)
+            <TabsTrigger value="ledger" onClick={() => router.push('/dashboard/ledger')}>
+              <BookOpenIcon data-icon="inline-start" />खाता बही
+            </TabsTrigger>
+            <TabsTrigger value="items" onClick={() => router.push('/dashboard/items')}>
+              <PackageIcon data-icon="inline-start" />आइटम
             </TabsTrigger>
           </TabsList>
-
-          <TabsContent value="new-bill">
-            <NewBillForm />
-          </TabsContent>
-
-          <TabsContent value="ledger">
-            <LedgerTab />
-          </TabsContent>
+          <TabsContent value="new-bill"><NewBillForm /></TabsContent>
+          <TabsContent value="ledger"><LedgerTab /></TabsContent>
+          <TabsContent value="items"><ItemCatalog /></TabsContent>
         </Tabs>
       </main>
     </div>

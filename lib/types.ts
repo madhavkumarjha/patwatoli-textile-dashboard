@@ -11,6 +11,16 @@ export const PITAMARI_UNIT = 'चौका'
 export const AINDI_SIZES = ['छोटा', 'बड़ा'] as const
 export const AINDI_UNIT = 'जोड़ा'
 
+export interface CatalogItem {
+  id: string
+  name: ProductName
+  description?: string
+  defaultUnit: string
+  sizes: string[]
+  styles?: string[]
+  createdAt: string
+}
+
 export const GST_RATE = 0.025 // 2.5% CGST + 2.5% SGST
 
 export type PaymentMode = 'नकद (Cash)' | 'UPI' | 'बैंक (Bank)' | 'चेक (Cheque)'
