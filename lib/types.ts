@@ -16,6 +16,7 @@ export interface CatalogItem {
   name: ProductName
   description?: string
   defaultUnit: string
+  defaultRate: number
   sizes: string[]
   styles?: string[]
   createdAt: string

@@ -157,8 +157,8 @@ const seedBills: Bill[] = [
 ]
 
 const seedCatalogItems: CatalogItem[] = [
-  { id: 'c_pitamari', name: 'पीतामरी', defaultUnit: PITAMARI_UNIT, sizes: [...PITAMARI_SIZES], styles: [...PITAMARI_STYLES], createdAt: daysAgo(120) },
-  { id: 'c_aindi', name: 'ऐंडी - चद्दर', defaultUnit: AINDI_UNIT, sizes: [...AINDI_SIZES], createdAt: daysAgo(120) },
+  { id: 'c_pitamari', name: 'पीतामरी', defaultUnit: PITAMARI_UNIT, defaultRate: 850, sizes: [...PITAMARI_SIZES], styles: [...PITAMARI_STYLES], createdAt: daysAgo(120) },
+  { id: 'c_aindi', name: 'ऐंडी - चद्दर', defaultUnit: AINDI_UNIT, defaultRate: 700, sizes: [...AINDI_SIZES], createdAt: daysAgo(120) },
 ]
 
 const seedPayments: Payment[] = [

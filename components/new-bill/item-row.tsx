@@ -13,6 +13,7 @@ import {
   AINDI_UNIT,
 } from '@/lib/types'
 import { itemTaxable, formatINR } from '@/lib/calc'
+import { useDataStore } from '@/lib/store'
 import type { BillFormValues } from '@/components/new-bill/new-bill-form'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -39,6 +40,7 @@ export function ItemRow({ index, onRemove, canRemove }: ItemRowProps) {
     useFormContext<BillFormValues>()
 
   const product = useWatch({ control, name: `items.${index}.product` })
+  const catalogItems = useDataStore((s) => s.catalogItems)
   const quantity = useWatch({ control, name: `items.${index}.quantity` })
   const rate = useWatch({ control, name: `items.${index}.rate` })
 
@@ -106,6 +108,8 @@ export function ItemRow({ index, onRemove, canRemove }: ItemRowProps) {
                   value={field.value || null}
                   onValueChange={(val) => {
                     field.onChange(val)
+                    const catalogItem = catalogItems.find((item) => item.name === val)
+                    setValue(`items.${index}.rate`, String(catalogItem?.defaultRate ?? 0), { shouldDirty: true })
                     // reset dependent fields + lock unit
                     setValue(`items.${index}.style`, '')
                     setValue(`items.${index}.size`, '')
