@@ -18,6 +18,7 @@ export interface CatalogItem {
   defaultUnit: string
   defaultRate: number
   sizes: string[]
+  sizeRates: Record<string, number>
   styles?: string[]
   createdAt: string
 }

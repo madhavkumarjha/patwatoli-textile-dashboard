@@ -36,7 +36,7 @@ interface ItemRowProps {
 }
 
 export function ItemRow({ index, onRemove, canRemove }: ItemRowProps) {
-  const { control, register, setValue, formState } =
+  const { control, register, setValue, getValues, formState } =
     useFormContext<BillFormValues>()
 
   const product = useWatch({ control, name: `items.${index}.product` })
@@ -109,7 +109,7 @@ export function ItemRow({ index, onRemove, canRemove }: ItemRowProps) {
                   onValueChange={(val) => {
                     field.onChange(val)
                     const catalogItem = catalogItems.find((item) => item.name === val)
-                    setValue(`items.${index}.rate`, String(catalogItem?.defaultRate ?? 0), { shouldDirty: true })
+                    setValue(`items.${index}.rate`, String(catalogItem?.sizeRates?.[getValues(`items.${index}.size`)] ?? catalogItem?.defaultRate ?? 0), { shouldDirty: true })
                     // reset dependent fields + lock unit
                     setValue(`items.${index}.style`, '')
                     setValue(`items.${index}.size`, '')
@@ -199,7 +199,11 @@ export function ItemRow({ index, onRemove, canRemove }: ItemRowProps) {
                 <Select
                   items={sizeOptions.map((s) => ({ label: s, value: s }))}
                   value={field.value || null}
-                  onValueChange={field.onChange}
+                  onValueChange={(value) => {
+                    field.onChange(value)
+                    const catalogItem = catalogItems.find((item) => item.name === getValues(`items.${index}.product`))
+                    setValue(`items.${index}.rate`, String(catalogItem?.sizeRates?.[value ?? ''] ?? catalogItem?.defaultRate ?? 0), { shouldDirty: true })
+                  }}
                   disabled={!product}
                 >
                   <SelectTrigger
