@@ -2,7 +2,8 @@
 
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import type { Bill, Merchant, Payment } from './types'
+import { AINDI_SIZES, AINDI_UNIT, PITAMARI_SIZES, PITAMARI_STYLES, PITAMARI_UNIT } from './types'
+import type { Bill, CatalogItem, Merchant, Payment } from './types'
 
 export function uid(prefix = 'id'): string {
   return `${prefix}_${Math.random().toString(36).slice(2, 9)}${Date.now().toString(36).slice(-4)}`
@@ -48,9 +49,13 @@ interface DataState {
   merchants: Merchant[]
   bills: Bill[]
   payments: Payment[]
+  catalogItems: CatalogItem[]
   addMerchant: (m: Omit<Merchant, 'id' | 'createdAt'>) => Merchant
   addBill: (b: Omit<Bill, 'id'>) => Bill
   addPayment: (p: Omit<Payment, 'id'>) => Payment
+  addCatalogItem: (item: Omit<CatalogItem, 'id' | 'createdAt'>) => CatalogItem
+  updateCatalogItem: (id: string, item: Partial<Omit<CatalogItem, 'id' | 'createdAt'>>) => void
+  deleteCatalogItem: (id: string) => void
 }
 
 const now = new Date()
@@ -151,6 +156,8 @@ const seedBills: Bill[] = [
   },
 ]
 
+const seedCatalogItems: CatalogItem[] = []
+
 const seedPayments: Payment[] = [
   {
     id: 'p_1',
@@ -188,6 +195,7 @@ export const useDataStore = create<DataState>()(
       merchants: seedMerchants,
       bills: seedBills,
       payments: seedPayments,
+      catalogItems: seedCatalogItems,
       addMerchant: (m) => {
         const merchant: Merchant = {
           ...m,
@@ -207,7 +215,21 @@ export const useDataStore = create<DataState>()(
         set((s) => ({ payments: [...s.payments, payment] }))
         return payment
       },
+      addCatalogItem: (item) => {
+        const created: CatalogItem = { ...item, id: uid('catalog'), createdAt: new Date().toISOString() }
+        set((s) => ({ catalogItems: [...s.catalogItems, created] }))
+        return created
+      },
+      updateCatalogItem: (id, item) => set((s) => ({ catalogItems: s.catalogItems.map((current) => current.id === id ? { ...current, ...item } : current) })),
+      deleteCatalogItem: (id) => set((s) => ({ catalogItems: s.catalogItems.filter((item) => item.id !== id) })),
     }),
-    { name: 'patwatoli-data', version: 1 },
+    {
+      name: 'patwatoli-data',
+      version: 2,
+      migrate: (persistedState) => ({
+        ...(persistedState as object),
+        catalogItems: [],
+      }),
+    },
   ),
 )
