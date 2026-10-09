@@ -156,10 +156,7 @@ const seedBills: Bill[] = [
   },
 ]
 
-const seedCatalogItems: CatalogItem[] = [
-  { id: 'c_pitamari', name: 'पीतामरी', defaultUnit: PITAMARI_UNIT, defaultRate: 850, sizes: [...PITAMARI_SIZES], styles: [...PITAMARI_STYLES], createdAt: daysAgo(120) },
-  { id: 'c_aindi', name: 'ऐंडी - चद्दर', defaultUnit: AINDI_UNIT, defaultRate: 700, sizes: [...AINDI_SIZES], createdAt: daysAgo(120) },
-]
+const seedCatalogItems: CatalogItem[] = []
 
 const seedPayments: Payment[] = [
   {
@@ -226,6 +223,13 @@ export const useDataStore = create<DataState>()(
       updateCatalogItem: (id, item) => set((s) => ({ catalogItems: s.catalogItems.map((current) => current.id === id ? { ...current, ...item } : current) })),
       deleteCatalogItem: (id) => set((s) => ({ catalogItems: s.catalogItems.filter((item) => item.id !== id) })),
     }),
-    { name: 'patwatoli-data', version: 1 },
+    {
+      name: 'patwatoli-data',
+      version: 2,
+      migrate: (persistedState) => ({
+        ...(persistedState as object),
+        catalogItems: [],
+      }),
+    },
   ),
 )
